@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sistema de Organização — Squad FIAP</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --bg: #0a0a0f; --surface: #12121a; --surface2: #1a1a2e; --surface3: #222240;
+    --border: #2a2a3e; --text: #e0e0e8; --text2: #8888a0; --text3: #5555770;
+    --accent: #6c5ce7; --accent2: #a29bfe; --green: #00b894; --green2: #55efc4;
+    --yellow: #fdcb6e; --red: #e17055; --blue: #74b9ff; --orange: #fab1a0;
+    --cyan: #81ecec;
+  }
+  body { font-family: 'Inter', -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.65; }
+  .container { max-width: 1200px; margin: 0 auto; padding: 2rem 1.5rem; }
+
+  /* Header */
+  .header { text-align: center; padding: 3rem 0 2rem; border-bottom: 1px solid var(--border); margin-bottom: 3rem; }
+  .header h1 { font-size: 2.2rem; font-weight: 800; background: linear-gradient(135deg, var(--green), var(--cyan)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .header .sub { color: var(--text2); margin-top: 0.5rem; }
+
+  /* Verdict Box */
+  .verdict { background: linear-gradient(135deg, rgba(0,184,148,0.08), rgba(108,92,231,0.08)); border: 2px solid var(--green); border-radius: 16px; padding: 2rem; margin-bottom: 3rem; }
+  .verdict h2 { color: var(--green); font-size: 1.3rem; margin-bottom: 1rem; }
+  .verdict p { margin-bottom: 0.75rem; color: var(--text); }
+  .verdict .highlight { color: var(--green2); font-weight: 700; }
+  .verdict .reason { background: var(--surface2); padding: 1rem; border-radius: 10px; margin-top: 1rem; border-left: 3px solid var(--green); }
+  .verdict .reason p { margin: 0; font-size: 0.9rem; color: var(--text2); }
+
+  /* Section */
+  .section { margin-bottom: 3.5rem; }
+  .section-title { font-size: 1.4rem; font-weight: 700; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.75rem; }
+
+  /* Architecture Diagram */
+  .arch-grid { display: grid; grid-template-columns: 1fr; gap: 1rem; }
+  .arch-layer { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 1.5rem; }
+  .arch-layer-title { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text2); margin-bottom: 1rem; font-weight: 600; }
+  .arch-tools { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+  .arch-tool { background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; padding: 0.75rem 1rem; flex: 1; min-width: 160px; }
+  .arch-tool .name { font-weight: 700; font-size: 0.95rem; margin-bottom: 0.25rem; }
+  .arch-tool .role { font-size: 0.8rem; color: var(--text2); }
+  .arch-tool.primary { border-color: var(--green); background: rgba(0,184,148,0.05); }
+  .arch-tool.primary .name { color: var(--green2); }
+  .arch-tool.secondary { border-color: var(--accent); background: rgba(108,92,231,0.05); }
+  .arch-tool.secondary .name { color: var(--accent2); }
+  .arch-tool.infra { border-color: var(--blue); background: rgba(116,185,255,0.05); }
+  .arch-tool.infra .name { color: var(--blue); }
+
+  /* Flow arrows */
+  .flow-connector { text-align: center; padding: 0.5rem 0; color: var(--text2); font-size: 1.2rem; }
+
+  /* Comparison Table */
+  .compare-table { width: 100%; border-collapse: collapse; background: var(--surface); border-radius: 12px; overflow: hidden; }
+  .compare-table th { background: var(--surface2); padding: 0.75rem 1rem; text-align: left; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text2); border-bottom: 1px solid var(--border); }
+  .compare-table td { padding: 0.75rem 1rem; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
+  .compare-table tr:last-child td { border: none; }
+  .compare-table .winner { background: rgba(0,184,148,0.08); }
+  .check { color: var(--green); font-weight: 700; }
+  .cross { color: var(--red); }
+  .partial { color: var(--yellow); }
+
+  /* Cards */
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 1.75rem; margin-bottom: 1rem; }
+  .card h3 { font-size: 1.1rem; margin-bottom: 0.75rem; }
+  .card h4 { font-size: 0.85rem; color: var(--text2); text-transform: uppercase; letter-spacing: 0.5px; margin: 1rem 0 0.5rem; }
+  .card ul { list-style: none; padding: 0; }
+  .card li { padding: 0.3rem 0; padding-left: 1.2rem; position: relative; font-size: 0.9rem; }
+  .card li::before { content: "→"; position: absolute; left: 0; color: var(--accent2); }
+  .card p { font-size: 0.9rem; color: var(--text2); margin-bottom: 0.5rem; }
+
+  .card.green-border { border-left: 4px solid var(--green); }
+  .card.blue-border { border-left: 4px solid var(--blue); }
+  .card.purple-border { border-left: 4px solid var(--accent); }
+  .card.yellow-border { border-left: 4px solid var(--yellow); }
+  .card.cyan-border { border-left: 4px solid var(--cyan); }
+
+  /* Notion structure */
+  .tree { font-family: 'Fira Code', 'Cascadia Code', monospace; font-size: 0.85rem; background: var(--surface2); padding: 1.5rem; border-radius: 10px; line-height: 1.8; overflow-x: auto; }
+  .tree .folder { color: var(--yellow); font-weight: 600; }
+  .tree .file { color: var(--text2); }
+  .tree .db { color: var(--cyan); font-weight: 600; }
+  .tree .comment { color: var(--text2); opacity: 0.5; font-style: italic; }
+
+  /* Workflow diagram */
+  .workflow { display: flex; flex-direction: column; gap: 0.5rem; }
+  .wf-step { display: flex; align-items: center; gap: 1rem; background: var(--surface2); padding: 0.75rem 1rem; border-radius: 8px; }
+  .wf-num { background: var(--accent); color: white; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 700; flex-shrink: 0; }
+  .wf-tool { color: var(--accent2); font-weight: 600; font-size: 0.8rem; min-width: 80px; }
+  .wf-desc { font-size: 0.85rem; color: var(--text); }
+  .wf-arrow { text-align: center; color: var(--text2); font-size: 0.9rem; }
+
+  /* Grid layouts */
+  .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem; }
+  .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; }
+
+  /* Tags */
+  .tag { display: inline-block; padding: 0.15rem 0.5rem; border-radius: 4px; font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+  .tag-green { background: rgba(0,184,148,0.15); color: var(--green); }
+  .tag-blue { background: rgba(116,185,255,0.15); color: var(--blue); }
+  .tag-purple { background: rgba(108,92,231,0.15); color: var(--accent2); }
+  .tag-yellow { background: rgba(253,203,110,0.15); color: var(--yellow); }
+  .tag-cyan { background: rgba(129,236,236,0.15); color: var(--cyan); }
+
+  /* Collapsible */
+  details { margin-top: 0.75rem; }
+  summary { cursor: pointer; color: var(--accent2); font-size: 0.85rem; font-weight: 600; }
+  details[open] summary { margin-bottom: 0.75rem; }
+
+  .callout { background: var(--surface2); border-left: 3px solid var(--accent); padding: 1rem 1.25rem; border-radius: 0 8px 8px 0; margin: 1rem 0; font-size: 0.9rem; }
+  .callout.green { border-color: var(--green); }
+  .callout.yellow { border-color: var(--yellow); }
+  .callout.red { border-color: var(--red); }
+
+  @media (max-width: 768px) {
+    .header h1 { font-size: 1.5rem; }
+    .container { padding: 1rem; }
+    .compare-table { font-size: 0.8rem; }
+    .arch-tools { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="header">
+    <h1>Sistema de Organização do Squad</h1>
+    <p class="sub">Arquitetura de ferramentas otimizada para integração máxima com Claude</p>
+  </div>
+
+  <!-- VEREDICTO -->
+  <div class="verdict">
+    <h2>Veredicto: Linear + Notion + GitHub + n8n</h2>
+    <p>Depois de analisar as ferramentas que vocês já têm conectadas, a resposta é clara. Vocês <span class="highlight">não precisam de mais nenhuma ferramenta</span> — precisam usar o que já têm da forma certa.</p>
+    <p>A combinação <span class="highlight">Linear + Notion + GitHub</span> é a mais poderosa que vocês poderiam ter porque as três estão diretamente integradas ao Claude via MCP. Isso significa que o Claude pode criar issues, buscar documentação e interagir com os repos sem vocês saírem da conversa.</p>
+    <div class="reason">
+      <p><strong>Por que não ClickUp/Obsidian/Trello?</strong> Nenhum deles tem integração MCP com o Claude. Cada minuto que vocês gastam fora do ecossistema integrado é produtividade perdida. O poder do setup de vocês é que o Claude pode "ver" tudo — issues, docs, workflows, deploys, banco — e agir sobre tudo de um lugar só.</p>
+    </div>
+  </div>
+
+  <!-- COMPARAÇÃO RÁPIDA -->
+  <div class="section">
+    <h2 class="section-title">Por que Linear + Notion (e não as alternativas)</h2>
+    <div style="overflow-x: auto;">
+    <table class="compare-table">
+      <thead>
+        <tr>
+          <th>Critério</th>
+          <th>Linear + Notion</th>
+          <th>ClickUp</th>
+          <th>Obsidian</th>
+          <th>Jira + Confluence</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="winner">
+          <td>Integração MCP com Claude</td>
+          <td><span class="check">Ambos conectados</span></td>
+          <td><span class="cross">Nenhuma</span></td>
+          <td><span class="cross">Nenhuma</span></td>
+          <td><span class="partial">Parcial (Jira só)</span></td>
+        </tr>
+        <tr class="winner">
+          <td>Claude cria/edita tasks</td>
+          <td><span class="check">Direto via MCP</span></td>
+          <td><span class="cross">Não</span></td>
+          <td><span class="cross">Não</span></td>
+          <td><span class="partial">Limitado</span></td>
+        </tr>
+        <tr class="winner">
+          <td>Claude busca docs</td>
+          <td><span class="check">Busca semântica</span></td>
+          <td><span class="cross">Não</span></td>
+          <td><span class="cross">Não</span></td>
+          <td><span class="cross">Não</span></td>
+        </tr>
+        <tr class="winner">
+          <td>Velocidade de uso</td>
+          <td><span class="check">Ultra rápido</span></td>
+          <td><span class="partial">Lento/pesado</span></td>
+          <td><span class="check">Rápido (local)</span></td>
+          <td><span class="cross">Muito lento</span></td>
+        </tr>
+        <tr class="winner">
+          <td>Vocês já usam</td>
+          <td><span class="check">Sim, ambos</span></td>
+          <td><span class="cross">Não</span></td>
+          <td><span class="cross">Não</span></td>
+          <td><span class="cross">Não</span></td>
+        </tr>
+        <tr class="winner">
+          <td>Custo</td>
+          <td><span class="check">Free tier suficiente</span></td>
+          <td><span class="check">Free tier ok</span></td>
+          <td><span class="check">Grátis</span></td>
+          <td><span class="partial">Pago para 4+</span></td>
+        </tr>
+        <tr class="winner">
+          <td>Ideal para dev teams</td>
+          <td><span class="check">Melhor da categoria</span></td>
+          <td><span class="partial">Genérico demais</span></td>
+          <td><span class="cross">Solo/notas apenas</span></td>
+          <td><span class="partial">Enterprise demais</span></td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+  </div>
+
+  <!-- ARQUITETURA -->
+  <div class="section">
+    <h2 class="section-title">Arquitetura Completa do Ecossistema</h2>
+
+    <div class="arch-grid">
+      <div class="arch-layer">
+        <div class="arch-layer-title">Camada 1 — Comando Central (Claude)</div>
+        <div class="arch-tools">
+          <div class="arch-tool primary">
+            <div class="name">Claude Max (2-3 planos)</div>
+            <div class="role">Cérebro do squad. Acessa tudo abaixo via MCP. Coda, planeja, documenta, revisa.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flow-connector">↕ MCP (acesso direto bidirecional) ↕</div>
+
+      <div class="arch-layer">
+        <div class="arch-layer-title">Camada 2 — Gestão e Documentação</div>
+        <div class="arch-tools">
+          <div class="arch-tool primary">
+            <div class="name">Linear</div>
+            <div class="role">Issues, sprints, bugs, features. Cada projeto = 1 projeto Linear. Claude cria e atualiza issues.</div>
+          </div>
+          <div class="arch-tool primary">
+            <div class="name">Notion</div>
+            <div class="role">Wiki do squad, SOPs, meeting notes, knowledge base, docs de produto, financeiro.</div>
+          </div>
+          <div class="arch-tool secondary">
+            <div class="name">GitHub</div>
+            <div class="role">Repos de código. 1 org, 1 repo por projeto. PRs, branches, CI/CD.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flow-connector">↕ Integrado ↕</div>
+
+      <div class="arch-layer">
+        <div class="arch-layer-title">Camada 3 — Infraestrutura e Produto</div>
+        <div class="arch-tools">
+          <div class="arch-tool infra">
+            <div class="name">Supabase</div>
+            <div class="role">Banco, auth, storage, edge functions. Claude executa SQL direto.</div>
+          </div>
+          <div class="arch-tool infra">
+            <div class="name">Vercel</div>
+            <div class="role">Deploy dos frontends. Claude vê logs, builds e faz deploy.</div>
+          </div>
+          <div class="arch-tool infra">
+            <div class="name">Stripe</div>
+            <div class="role">Pagamentos. Claude lista clientes, invoices, cria produtos e preços.</div>
+          </div>
+          <div class="arch-tool infra">
+            <div class="name">n8n</div>
+            <div class="role">Automações: notificações, reports, webhooks. Claude busca e executa workflows.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flow-connector">↕</div>
+
+      <div class="arch-layer">
+        <div class="arch-layer-title">Camada 4 — Storage e Comunicação</div>
+        <div class="arch-tools">
+          <div class="arch-tool secondary">
+            <div class="name">Google Drive</div>
+            <div class="role">Propostas comerciais, contratos, assets visuais. Claude busca e lê arquivos.</div>
+          </div>
+          <div class="arch-tool secondary">
+            <div class="name">WhatsApp (Grupo)</div>
+            <div class="role">Comunicação rápida do squad. Quick syncs, alertas. NÃO para decisões importantes.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout green" style="margin-top: 1.5rem;">
+      <strong>O diferencial:</strong> Todas as ferramentas das camadas 1-3 estão conectadas ao Claude via MCP. Isso significa que vocês podem pedir "Claude, cria uma issue no Linear para o bug X, verifica o log do Vercel, e consulta a tabela Y no Supabase" — tudo numa conversa só. Nenhum squad no Brasil opera nesse nível de integração.
+    </div>
+  </div>
+
+  <!-- ESTRUTURA LINEAR -->
+  <div class="section">
+    <h2 class="section-title">Estrutura no Linear — Gestão de Tarefas</h2>
+
+    <div class="card green-border">
+      <h3>Organização: 1 Team por Área de Negócio</h3>
+      <p>O time "Ruralfy" que já existe vira só mais um. Criem teams separados para cada frente:</p>
+      <div class="tree">
+<span class="folder">Linear Workspace</span>
+├── <span class="folder">Squad Ops</span> <span class="comment">← Team geral: infra, processos, decisões</span>
+│   ├── <span class="db">Projeto: Setup Inicial</span>
+│   └── <span class="db">Projeto: Processos e Rituais</span>
+│
+├── <span class="folder">Agência IA</span> <span class="comment">← Team: projetos de clientes</span>
+│   ├── <span class="db">Projeto: Cliente X — Bot WhatsApp</span>
+│   ├── <span class="db">Projeto: Cliente Y — Automação CRM</span>
+│   └── <span class="db">Backlog de Prospecção</span>
+│
+├── <span class="folder">WhatsApp SaaS</span> <span class="comment">← Team: produto principal</span>
+│   ├── <span class="db">Projeto: MVP (Sprint 1-4)</span>
+│   ├── <span class="db">Projeto: Landing Page + Marketing</span>
+│   └── <span class="db">Backlog de Features</span>
+│
+├── <span class="folder">CyberShield</span> <span class="comment">← Team: security products</span>
+│   ├── <span class="db">Projeto: Pipeline de Scan</span>
+│   ├── <span class="db">Projeto: Clientes Auditoria</span>
+│   └── <span class="db">Projeto: LGPD Automation</span>
+│
+├── <span class="folder">Produtos Digitais</span> <span class="comment">← Team: templates e infoprodutos</span>
+│   ├── <span class="db">Projeto: Pack Automações n8n</span>
+│   ├── <span class="db">Projeto: Boilerplate SaaS</span>
+│   └── <span class="db">Projeto: Kit Templates</span>
+│
+└── <span class="folder">Ruralfy</span> <span class="comment">← Team existente (legado/paralelo)</span>
+      </div>
+
+      <h4>Labels padronizados para todo o workspace</h4>
+      <ul>
+        <li><span class="tag tag-green">revenue</span> — Gera dinheiro diretamente</li>
+        <li><span class="tag tag-blue">product</span> — Constrói produto/ativo</li>
+        <li><span class="tag tag-purple">infra</span> — Setup, devops, tooling</li>
+        <li><span class="tag tag-yellow">blocked</span> — Esperando algo externo</li>
+        <li><span class="tag tag-cyan">quick-win</span> — Menos de 2h para concluir</li>
+      </ul>
+
+      <h4>Ciclos semanais (Sprints)</h4>
+      <ul>
+        <li>Sprint de segunda a sexta (5 dias)</li>
+        <li>Cada membro puxa no máximo 5-7 issues por sprint</li>
+        <li>Issues com label <span class="tag tag-green">revenue</span> sempre têm prioridade "Urgent"</li>
+        <li>Daily: cada um atualiza o status das suas issues no Linear (In Progress / Done)</li>
+      </ul>
+
+      <h4>Como o Claude interage</h4>
+      <ul>
+        <li>"Claude, cria uma issue no time Agência IA: implementar bot para Cliente X"</li>
+        <li>"Claude, quais issues estão In Progress no WhatsApp SaaS?"</li>
+        <li>"Claude, move a issue RUR-42 para Done e adiciona comentário de entrega"</li>
+        <li>"Claude, lista tudo que está bloqueado no squad essa semana"</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ESTRUTURA NOTION -->
+  <div class="section">
+    <h2 class="section-title">Estrutura no Notion — Knowledge Base</h2>
+
+    <div class="card blue-border">
+      <h3>Notion = Wiki + Docs + Decisões (NÃO tasks)</h3>
+      <p>Regra fundamental: <strong>tasks ficam no Linear, documentação fica no Notion</strong>. Nunca misturem. O Notion serve para tudo que não é "o que fazer agora" — é o cérebro de longo prazo do squad.</p>
+
+      <div class="tree" style="margin-top: 1rem;">
+<span class="folder">Squad FIAP — Workspace</span>
+│
+├── <span class="folder">Home</span> <span class="comment">← Dashboard do squad (links rápidos, métricas, status)</span>
+│
+├── <span class="folder">Operação</span>
+│   ├── <span class="file">Estratégia 30 Dias</span> <span class="comment">← O plano mestre</span>
+│   ├── <span class="file">Rituais e Processos</span> <span class="comment">← Daily, weekly, retro</span>
+│   ├── <span class="file">Divisão de Responsabilidades</span>
+│   ├── <span class="db">DB: Financeiro</span> <span class="comment">← Receita, custos, projeções (database)</span>
+│   └── <span class="db">DB: Decisões</span> <span class="comment">← Log de decisões importantes + reasoning</span>
+│
+├── <span class="folder">Agência IA</span>
+│   ├── <span class="file">Playbook de Vendas</span> <span class="comment">← Scripts, objeções, pricing</span>
+│   ├── <span class="file">Stack Técnico Padrão</span> <span class="comment">← Como montamos cada projeto</span>
+│   ├── <span class="db">DB: Pipeline de Clientes</span> <span class="comment">← CRM simplificado</span>
+│   ├── <span class="db">DB: Projetos Entregues</span> <span class="comment">← Cases e aprendizados</span>
+│   └── <span class="file">Template: Proposta Comercial</span>
+│
+├── <span class="folder">WhatsApp SaaS</span>
+│   ├── <span class="file">PRD — Product Requirements</span>
+│   ├── <span class="file">Arquitetura Técnica</span>
+│   ├── <span class="file">Playbook de Go-to-Market</span>
+│   ├── <span class="db">DB: Feedback de Usuários</span>
+│   └── <span class="db">DB: Métricas (MRR, churn, signups)</span>
+│
+├── <span class="folder">CyberShield</span>
+│   ├── <span class="file">Metodologia de Scan</span>
+│   ├── <span class="file">Template: Relatório de Auditoria</span>
+│   ├── <span class="db">DB: Clientes de Segurança</span>
+│   └── <span class="file">Checklist LGPD</span>
+│
+├── <span class="folder">Produtos Digitais</span>
+│   ├── <span class="db">DB: Catálogo de Produtos</span> <span class="comment">← Preço, plataforma, link, vendas</span>
+│   └── <span class="file">Guia de Lançamento</span>
+│
+├── <span class="folder">Conhecimento Técnico</span>
+│   ├── <span class="file">Setup Claude Max — Melhores Práticas</span>
+│   ├── <span class="file">Guia n8n — Padrões do Squad</span>
+│   ├── <span class="file">Guia Supabase — Convenções</span>
+│   ├── <span class="file">Guia Deploy Vercel</span>
+│   └── <span class="file">Security Best Practices (Henrique)</span>
+│
+├── <span class="folder">Meeting Notes</span>
+│   ├── <span class="db">DB: Dailys</span> <span class="comment">← Template: data, quem, progresso, blocker</span>
+│   ├── <span class="db">DB: Weeklys</span>
+│   └── <span class="db">DB: Retrospectivas</span>
+│
+└── <span class="folder">Referências</span>
+    ├── <span class="file">CLAUDE.md (legado)</span>
+    ├── <span class="file">Plugins Instalados</span>
+    └── <span class="file">Links Úteis</span>
+      </div>
+
+      <h4 style="margin-top: 1.5rem;">Como o Claude interage com o Notion</h4>
+      <ul>
+        <li>"Claude, busca no Notion o playbook de vendas da agência"</li>
+        <li>"Claude, cria uma página em Meeting Notes com o resumo da daily de hoje"</li>
+        <li>"Claude, procura todas as decisões sobre pricing do SaaS"</li>
+        <li>"Claude, qual é a arquitetura técnica do WhatsApp SaaS?"</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- GITHUB -->
+  <div class="section">
+    <h2 class="section-title">Estrutura no GitHub — Código</h2>
+
+    <div class="card purple-border">
+      <h3>1 Organização, 1 Repo por Projeto</h3>
+      <div class="tree">
+<span class="folder">github.com/squad-fiap</span> <span class="comment">← Org</span>
+│
+├── <span class="folder">agency-templates</span> <span class="comment">← Monorepo com templates reutilizáveis da agência</span>
+│   ├── whatsapp-bot-starter/
+│   ├── n8n-automation-pack/
+│   └── landing-page-ai/
+│
+├── <span class="folder">whatsapp-saas</span> <span class="comment">← Produto principal</span>
+│   ├── apps/web/          <span class="comment">← Next.js frontend</span>
+│   ├── apps/api/          <span class="comment">← Backend/Edge functions</span>
+│   └── packages/shared/   <span class="comment">← Tipos e utils compartilhados</span>
+│
+├── <span class="folder">cybershield</span> <span class="comment">← Security scan tool</span>
+│   ├── scanner/
+│   ├── report-generator/
+│   └── dashboard/
+│
+├── <span class="folder">digital-products</span> <span class="comment">← Templates para venda</span>
+│   ├── saas-boilerplate/
+│   ├── n8n-workflow-pack/
+│   └── prompt-toolkit/
+│
+└── <span class="folder">infra</span> <span class="comment">← Configs compartilhadas</span>
+    ├── docker-compose files
+    ├── n8n workflows (export)
+    └── shared env templates
+      </div>
+
+      <h4>Git Workflow: Trunk-Based (simplificado)</h4>
+      <ul>
+        <li><strong>main</strong> = produção, sempre deployável</li>
+        <li><strong>feature/xxx</strong> = branches curtas (máx 1-2 dias)</li>
+        <li>PR obrigatório para main, mas review rápido (Claude pode ajudar)</li>
+        <li>Sem develop/staging — vocês são 4, não precisam de cerimônia</li>
+        <li>Commits com prefixo: feat:, fix:, docs:, chore:</li>
+      </ul>
+
+      <h4>Integração Linear ↔ GitHub</h4>
+      <ul>
+        <li>Ativem a integração nativa Linear-GitHub</li>
+        <li>Branch name = prefixo da issue Linear (ex: feat/AGN-42-whatsapp-bot)</li>
+        <li>PR fecha a issue automaticamente quando mergeado</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- N8N AUTOMATIONS -->
+  <div class="section">
+    <h2 class="section-title">Automações n8n — O Sistema Nervoso</h2>
+
+    <div class="grid-2">
+      <div class="card cyan-border">
+        <h3>Automação 1: Daily Report</h3>
+        <span class="tag tag-cyan">prioridade alta</span>
+        <p style="margin-top: 0.5rem;">Todo dia às 21h, o n8n coleta dados e manda um resumo no WhatsApp do grupo.</p>
+        <div class="workflow" style="margin-top: 0.75rem;">
+          <div class="wf-step"><div class="wf-num">1</div><div class="wf-tool">Cron</div><div class="wf-desc">Trigger às 21:00</div></div>
+          <div class="wf-step"><div class="wf-num">2</div><div class="wf-tool">Linear API</div><div class="wf-desc">Busca issues completadas hoje</div></div>
+          <div class="wf-step"><div class="wf-num">3</div><div class="wf-tool">Supabase</div><div class="wf-desc">Puxa métricas (signups, revenue)</div></div>
+          <div class="wf-step"><div class="wf-num">4</div><div class="wf-tool">Claude API</div><div class="wf-desc">Gera resumo formatado</div></div>
+          <div class="wf-step"><div class="wf-num">5</div><div class="wf-tool">WhatsApp</div><div class="wf-desc">Envia para grupo do squad</div></div>
+        </div>
+      </div>
+
+      <div class="card cyan-border">
+        <h3>Automação 2: Lead Notification</h3>
+        <span class="tag tag-green">revenue</span>
+        <p style="margin-top: 0.5rem;">Quando um lead entra pelo site da agência, notifica o Ricardo imediatamente.</p>
+        <div class="workflow" style="margin-top: 0.75rem;">
+          <div class="wf-step"><div class="wf-num">1</div><div class="wf-tool">Webhook</div><div class="wf-desc">Formulário do site envia dados</div></div>
+          <div class="wf-step"><div class="wf-num">2</div><div class="wf-tool">Supabase</div><div class="wf-desc">Salva lead no banco</div></div>
+          <div class="wf-step"><div class="wf-num">3</div><div class="wf-tool">Linear API</div><div class="wf-desc">Cria issue no time Agência</div></div>
+          <div class="wf-step"><div class="wf-num">4</div><div class="wf-tool">WhatsApp</div><div class="wf-desc">Notifica Ricardo com detalhes</div></div>
+        </div>
+      </div>
+
+      <div class="card cyan-border">
+        <h3>Automação 3: Revenue Tracker</h3>
+        <span class="tag tag-green">revenue</span>
+        <p style="margin-top: 0.5rem;">Toda vez que entra dinheiro no Stripe, atualiza o Notion e celebra no grupo.</p>
+        <div class="workflow" style="margin-top: 0.75rem;">
+          <div class="wf-step"><div class="wf-num">1</div><div class="wf-tool">Stripe</div><div class="wf-desc">Webhook: payment_intent.succeeded</div></div>
+          <div class="wf-step"><div class="wf-num">2</div><div class="wf-tool">Notion API</div><div class="wf-desc">Adiciona entrada no DB Financeiro</div></div>
+          <div class="wf-step"><div class="wf-num">3</div><div class="wf-tool">WhatsApp</div><div class="wf-desc">"ENTROU R$X,XX do Cliente Y"</div></div>
+        </div>
+      </div>
+
+      <div class="card cyan-border">
+        <h3>Automação 4: Deploy Monitor</h3>
+        <span class="tag tag-purple">infra</span>
+        <p style="margin-top: 0.5rem;">Monitora deploys no Vercel e avisa se algo quebrou.</p>
+        <div class="workflow" style="margin-top: 0.75rem;">
+          <div class="wf-step"><div class="wf-num">1</div><div class="wf-tool">Vercel</div><div class="wf-desc">Webhook: deployment.error</div></div>
+          <div class="wf-step"><div class="wf-num">2</div><div class="wf-tool">Linear API</div><div class="wf-desc">Cria issue de bug urgente</div></div>
+          <div class="wf-step"><div class="wf-num">3</div><div class="wf-tool">WhatsApp</div><div class="wf-desc">Alerta: "DEPLOY FALHOU no projeto X"</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FLUXO DIÁRIO -->
+  <div class="section">
+    <h2 class="section-title">Fluxo Diário do Squad</h2>
+
+    <div class="card" style="border-left: 4px solid var(--green);">
+      <div class="tree">
+<span class="folder">09:00 — Daily Standup (15min no WhatsApp call)</span>
+│   Cada um fala: o que fez / o que vai fazer / blockers
+│   → Atualiza issues no Linear (status)
+│   → Se surgir decisão importante → registra no Notion DB: Decisões
+│
+<span class="folder">09:15 — Início do foco profundo</span>
+│   Cada um abre seu Claude Max e começa a trabalhar
+│   → Claude lê as issues do Linear para contexto
+│   → Claude consulta docs do Notion quando precisa
+│   → Código vai direto pro GitHub via Claude
+│
+<span class="folder">13:00 — Quick sync (5min, texto no WhatsApp)</span>
+│   "Estou em X, preciso de Y, sem blockers"
+│
+<span class="folder">13:10 — Volta ao foco</span>
+│   → PRs são revisados entre membros (ou pelo Claude)
+│   → Deploys automáticos via Vercel
+│
+<span class="folder">18:00 — Bloco de vendas/marketing (Ricardo + quem estiver livre)</span>
+│   → Prospecção no LinkedIn
+│   → Follow-up com leads
+│   → Atualiza Pipeline no Notion
+│
+<span class="folder">21:00 — Review do dia</span>
+│   → n8n manda o daily report automático
+│   → Squad revisa métricas no grupo
+│   → Qualquer blocker para amanhã é resolvido AGORA
+│
+<span class="folder">21:30+ — Trabalho assíncrono (opcional)</span>
+    → Tarefas que não precisam de sync
+    → Claude rodando refactoring, testes, docs
+    → Henrique faz scans noturnos (security)
+      </div>
+    </div>
+  </div>
+
+  <!-- FLUXO DE DECISÃO -->
+  <div class="section">
+    <h2 class="section-title">Onde Cada Coisa Acontece — Regra Clara</h2>
+
+    <div class="grid-3">
+      <div class="card green-border">
+        <h3 style="color: var(--green);">Linear</h3>
+        <ul>
+          <li>Toda tarefa acionável</li>
+          <li>Bugs e fix urgentes</li>
+          <li>Sprint planning</li>
+          <li>Tracking de progresso</li>
+          <li>Backlog de features</li>
+        </ul>
+        <p style="margin-top: 0.5rem;"><strong>Quando usar:</strong> "O que eu faço agora?"</p>
+      </div>
+
+      <div class="card blue-border">
+        <h3 style="color: var(--blue);">Notion</h3>
+        <ul>
+          <li>Documentação permanente</li>
+          <li>Decisões e seus porquês</li>
+          <li>Playbooks e SOPs</li>
+          <li>Dados financeiros</li>
+          <li>Meeting notes</li>
+        </ul>
+        <p style="margin-top: 0.5rem;"><strong>Quando usar:</strong> "Como fazemos isso?" / "Por que decidimos X?"</p>
+      </div>
+
+      <div class="card purple-border">
+        <h3 style="color: var(--accent2);">GitHub</h3>
+        <ul>
+          <li>Todo código</li>
+          <li>PRs e code review</li>
+          <li>CI/CD configs</li>
+          <li>Issues TÉCNICAS (bugs de código)</li>
+          <li>Releases</li>
+        </ul>
+        <p style="margin-top: 0.5rem;"><strong>Quando usar:</strong> "Onde está o código?" / "Preciso fazer review"</p>
+      </div>
+
+      <div class="card cyan-border">
+        <h3 style="color: var(--cyan);">n8n</h3>
+        <ul>
+          <li>Automações internas</li>
+          <li>Webhooks dos produtos</li>
+          <li>Reports automáticos</li>
+          <li>Integrações entre tools</li>
+        </ul>
+        <p style="margin-top: 0.5rem;"><strong>Quando usar:</strong> "Isso deveria ser automático"</p>
+      </div>
+
+      <div class="card yellow-border">
+        <h3 style="color: var(--yellow);">WhatsApp</h3>
+        <ul>
+          <li>Comunicação rápida</li>
+          <li>Dailys / quick syncs</li>
+          <li>Alertas urgentes</li>
+          <li>Celebrações</li>
+        </ul>
+        <p style="margin-top: 0.5rem;"><strong>Quando usar:</strong> "Preciso de resposta em 5min" (NUNCA para decisões)</p>
+      </div>
+
+      <div class="card" style="border-left: 4px solid var(--orange);">
+        <h3 style="color: var(--orange);">Google Drive</h3>
+        <ul>
+          <li>Propostas comerciais</li>
+          <li>Contratos</li>
+          <li>Assets visuais</li>
+          <li>Arquivos para clientes</li>
+        </ul>
+        <p style="margin-top: 0.5rem;"><strong>Quando usar:</strong> "Preciso enviar um doc para alguém externo"</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- SETUP INICIAL -->
+  <div class="section">
+    <h2 class="section-title">Checklist de Setup — Dia 1</h2>
+
+    <div class="card green-border">
+      <h3>O que configurar ANTES de começar a codar</h3>
+
+      <h4>Linear (30min)</h4>
+      <ul>
+        <li>Criar teams: Squad Ops, Agência IA, WhatsApp SaaS, CyberShield, Produtos Digitais</li>
+        <li>Criar labels globais: revenue, product, infra, blocked, quick-win</li>
+        <li>Configurar ciclos semanais (seg-sex)</li>
+        <li>Convidar os 4 membros</li>
+        <li>Integrar com GitHub (Settings → Integrations → GitHub)</li>
+      </ul>
+
+      <h4>Notion (1h)</h4>
+      <ul>
+        <li>Criar a estrutura de páginas conforme o mapa acima</li>
+        <li>Criar os databases: Financeiro, Pipeline Clientes, Decisões, Dailys</li>
+        <li>Copiar o plano estratégico para a página "Estratégia 30 Dias"</li>
+        <li>Criar template de daily (propriedades: data, participantes, progresso, blockers)</li>
+        <li>Convidar os 4 membros</li>
+      </ul>
+
+      <h4>GitHub (30min)</h4>
+      <ul>
+        <li>Criar org "squad-fiap" (ou nome que preferirem)</li>
+        <li>Criar repos iniciais: agency-templates, whatsapp-saas</li>
+        <li>Configurar branch protection em main (require PR)</li>
+        <li>Conectar Vercel aos repos</li>
+      </ul>
+
+      <h4>n8n (1h)</h4>
+      <ul>
+        <li>Criar workspace organizado por pastas</li>
+        <li>Montar a automação de Daily Report (prioridade 1)</li>
+        <li>Montar a automação de Revenue Tracker</li>
+        <li>Testar webhook de lead capture</li>
+      </ul>
+
+      <h4>Claude Max — Skills customizadas</h4>
+      <ul>
+        <li>Criar 1 skill por projeto (contexto persistente para cada produto)</li>
+        <li>Documentar stack técnica, decisões e padrões em cada skill</li>
+        <li>Compartilhar as skills entre as contas para consistência</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- SUPERPOWERS -->
+  <div class="section">
+    <h2 class="section-title">Superpoderes — O que esse setup permite</h2>
+
+    <div class="grid-2">
+      <div class="card" style="border-left: 4px solid var(--green2);">
+        <h3>"Claude, prepara meu dia"</h3>
+        <p>Claude consulta suas issues no Linear, verifica deploys no Vercel, checa métricas no Supabase, e te dá um briefing completo do que fazer. Cada membro começa o dia com contexto total em 30 segundos.</p>
+      </div>
+
+      <div class="card" style="border-left: 4px solid var(--green2);">
+        <h3>"Claude, entrega esse projeto"</h3>
+        <p>Claude lê a proposta no Google Drive, puxa o escopo das issues do Linear, monta o código baseado nos templates do GitHub, faz deploy no Vercel, configura o Stripe, e marca as issues como Done. Um projeto de agência entregue em horas.</p>
+      </div>
+
+      <div class="card" style="border-left: 4px solid var(--green2);">
+        <h3>"Claude, como estamos financeiramente?"</h3>
+        <p>Claude consulta o Stripe (receita), Notion (custos registrados), e Linear (projetos em andamento) para te dar um snapshot financeiro completo. MRR, pipeline, burn rate — tudo em uma resposta.</p>
+      </div>
+
+      <div class="card" style="border-left: 4px solid var(--green2);">
+        <h3>"Claude, audita o site do cliente"</h3>
+        <p>Henrique pede ao Claude para gerar os comandos de scan, processar os resultados, e gerar o relatório PDF de auditoria — tudo via uma conversa. De scan a relatório entregue em 1 hora em vez de 1 dia.</p>
+      </div>
+    </div>
+  </div>
+
+  <div style="text-align: center; padding: 2rem; color: var(--text2); font-size: 0.85rem; border-top: 1px solid var(--border); margin-top: 2rem;">
+    Sistema de Organização — Squad FIAP — Março 2026<br>
+    Próximo passo: Executar o checklist de setup (Dia 1) e começar a Semana 1
+  </div>
+
+</div>
+</body>
+</html>

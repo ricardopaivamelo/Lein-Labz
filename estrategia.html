@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Estratégia Intensiva 30 Dias — Squad FIAP</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --bg: #0a0a0f; --surface: #12121a; --surface2: #1a1a2e;
+    --border: #2a2a3e; --text: #e0e0e8; --text2: #8888a0;
+    --accent: #6c5ce7; --accent2: #a29bfe; --green: #00b894;
+    --yellow: #fdcb6e; --red: #e17055; --blue: #74b9ff;
+    --orange: #e17055;
+  }
+  body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+
+  .container { max-width: 1200px; margin: 0 auto; padding: 2rem 1.5rem; }
+
+  /* Header */
+  .header { text-align: center; padding: 3rem 0 2rem; border-bottom: 1px solid var(--border); margin-bottom: 3rem; }
+  .header h1 { font-size: 2.2rem; font-weight: 800; background: linear-gradient(135deg, var(--accent), var(--blue)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 0.5rem; }
+  .header .subtitle { color: var(--text2); font-size: 1.1rem; }
+  .header .meta { display: flex; gap: 2rem; justify-content: center; margin-top: 1.5rem; flex-wrap: wrap; }
+  .header .meta-item { background: var(--surface); padding: 0.5rem 1rem; border-radius: 8px; border: 1px solid var(--border); }
+  .meta-label { color: var(--text2); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; }
+  .meta-value { font-weight: 700; color: var(--accent2); }
+
+  /* Section */
+  .section { margin-bottom: 3rem; }
+  .section-title { font-size: 1.5rem; font-weight: 700; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.75rem; }
+  .section-title .icon { font-size: 1.3rem; }
+
+  /* Ranking Cards */
+  .ranking-grid { display: flex; flex-direction: column; gap: 1.5rem; }
+  .rank-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 1.75rem; position: relative; overflow: hidden; transition: transform 0.2s; }
+  .rank-card:hover { transform: translateY(-2px); }
+  .rank-card.tier-s { border-left: 4px solid var(--green); }
+  .rank-card.tier-a { border-left: 4px solid var(--blue); }
+  .rank-card.tier-b { border-left: 4px solid var(--yellow); }
+  .rank-card.tier-c { border-left: 4px solid var(--orange); }
+
+  .rank-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.75rem; }
+  .rank-number { font-size: 2rem; font-weight: 900; color: var(--accent); opacity: 0.3; position: absolute; top: 10px; right: 20px; font-size: 3rem; }
+  .rank-title { font-size: 1.25rem; font-weight: 700; }
+  .rank-tags { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+  .tag { padding: 0.2rem 0.6rem; border-radius: 6px; font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+  .tag-green { background: rgba(0,184,148,0.15); color: var(--green); }
+  .tag-blue { background: rgba(116,185,255,0.15); color: var(--blue); }
+  .tag-yellow { background: rgba(253,203,110,0.15); color: var(--yellow); }
+  .tag-purple { background: rgba(108,92,231,0.15); color: var(--accent2); }
+
+  .rank-body { color: var(--text2); margin-bottom: 1rem; }
+
+  .rank-metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 0.75rem; margin-top: 1rem; }
+  .metric { background: var(--surface2); padding: 0.75rem; border-radius: 8px; text-align: center; }
+  .metric-label { font-size: 0.7rem; color: var(--text2); text-transform: uppercase; letter-spacing: 0.5px; }
+  .metric-value { font-size: 1.1rem; font-weight: 700; margin-top: 0.25rem; }
+  .metric-value.green { color: var(--green); }
+  .metric-value.blue { color: var(--blue); }
+  .metric-value.yellow { color: var(--yellow); }
+  .metric-value.purple { color: var(--accent2); }
+
+  .rank-details { margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+  .rank-details h4 { font-size: 0.85rem; color: var(--text2); margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.5px; }
+  .rank-details ul { list-style: none; padding: 0; }
+  .rank-details li { padding: 0.3rem 0; padding-left: 1.2rem; position: relative; color: var(--text); font-size: 0.9rem; }
+  .rank-details li::before { content: "→"; position: absolute; left: 0; color: var(--accent2); }
+
+  /* Team Allocation */
+  .team-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; }
+  .team-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem; }
+  .team-name { font-weight: 700; font-size: 1.1rem; margin-bottom: 0.25rem; }
+  .team-role { color: var(--accent2); font-size: 0.85rem; margin-bottom: 0.75rem; }
+  .team-tasks { font-size: 0.85rem; color: var(--text2); }
+  .team-tasks li { margin-bottom: 0.3rem; list-style: none; padding-left: 1rem; position: relative; }
+  .team-tasks li::before { content: "•"; position: absolute; left: 0; color: var(--accent); }
+
+  /* Timeline */
+  .timeline { position: relative; }
+  .week { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; margin-bottom: 1rem; }
+  .week-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem; }
+  .week-title { font-weight: 700; font-size: 1.1rem; }
+  .week-focus { color: var(--accent2); font-size: 0.85rem; font-style: italic; }
+  .week-tasks { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0.75rem; }
+  .week-task { background: var(--surface2); padding: 0.75rem; border-radius: 8px; font-size: 0.85rem; }
+  .week-task .person { color: var(--accent2); font-weight: 600; font-size: 0.75rem; display: block; margin-bottom: 0.25rem; }
+
+  /* Financial */
+  .finance-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; }
+  .finance-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; }
+  .finance-title { font-weight: 600; margin-bottom: 1rem; color: var(--text2); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; }
+  .finance-row { display: flex; justify-content: space-between; padding: 0.4rem 0; border-bottom: 1px solid rgba(42,42,62,0.5); font-size: 0.9rem; }
+  .finance-row:last-child { border: none; }
+  .finance-row .label { color: var(--text2); }
+  .finance-total { margin-top: 0.75rem; padding-top: 0.75rem; border-top: 2px solid var(--accent); display: flex; justify-content: space-between; font-weight: 700; font-size: 1.1rem; }
+  .finance-total .value { color: var(--green); }
+
+  /* Strategy Box */
+  .strategy-box { background: linear-gradient(135deg, rgba(108,92,231,0.1), rgba(116,185,255,0.1)); border: 1px solid var(--accent); border-radius: 16px; padding: 2rem; margin: 2rem 0; }
+  .strategy-box h3 { color: var(--accent2); margin-bottom: 1rem; font-size: 1.2rem; }
+  .strategy-box p { color: var(--text); margin-bottom: 0.75rem; font-size: 0.95rem; }
+
+  /* Collapsible */
+  details { margin-top: 0.75rem; }
+  summary { cursor: pointer; color: var(--accent2); font-size: 0.85rem; font-weight: 600; }
+  summary:hover { color: var(--accent); }
+  details[open] summary { margin-bottom: 0.75rem; }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .header h1 { font-size: 1.6rem; }
+    .container { padding: 1rem; }
+    .rank-metrics { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- HEADER -->
+  <div class="header">
+    <h1>Operação 30 Dias — Squad FIAP</h1>
+    <p class="subtitle">Estratégia de monetização intensiva com IA + Cybersec</p>
+    <div class="meta">
+      <div class="meta-item">
+        <div class="meta-label">Equipe</div>
+        <div class="meta-value">4 devs</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">Capital Inicial</div>
+        <div class="meta-value">R$500 – R$2.000</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">Meta Mês 2</div>
+        <div class="meta-value">R$15.000 – R$50.000</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">Ferramentas</div>
+        <div class="meta-value">2–3x Claude Max</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FILOSOFIA ESTRATÉGICA -->
+  <div class="strategy-box">
+    <h3>Filosofia Central: "Cash Cow + Moonshot"</h3>
+    <p>A estratégia se divide em dois eixos simultâneos. O <strong>Eixo 1 (Cash Cow)</strong> gera receita imediata via serviços — vocês vendem automações e implementações enquanto constroem. O <strong>Eixo 2 (Produto)</strong> constrói ativos que escalam — micro-SaaS e produtos digitais que geram receita recorrente e passiva.</p>
+    <p>A lógica é simples: os serviços financiam a operação e geram cases enquanto os produtos são construídos. Depois do mês 1, os produtos assumem como fonte principal de receita.</p>
+    <p><strong>Regra de ouro:</strong> Nunca gaste mais de 3 dias construindo algo sem validar que alguém pagaria por isso. Validação antes de código.</p>
+  </div>
+
+  <!-- RANKING DE PROJETOS -->
+  <div class="section">
+    <h2 class="section-title"><span class="icon">🏆</span> Ranking de Projetos — Por Retorno Financeiro</h2>
+
+    <div class="ranking-grid">
+
+      <!-- #1 -->
+      <div class="rank-card tier-s">
+        <div class="rank-number">#1</div>
+        <div class="rank-header">
+          <div>
+            <div class="rank-title">Agência de Automação com IA</div>
+            <div class="rank-tags">
+              <span class="tag tag-green">RETORNO IMEDIATO</span>
+              <span class="tag tag-blue">SERVIÇO</span>
+              <span class="tag tag-purple">ALTA PRIORIDADE</span>
+            </div>
+          </div>
+        </div>
+        <div class="rank-body">
+          Vender implementações de agentes de IA, bots de WhatsApp, automações com n8n, e integrações para PMEs e profissionais liberais. Vocês vendem o serviço, usam Claude Max para construir tudo em velocidade absurda, e entregam em dias o que agências tradicionais levam semanas.
+        </div>
+        <div class="rank-metrics">
+          <div class="metric">
+            <div class="metric-label">Receita/Mês</div>
+            <div class="metric-value green">R$8k–30k</div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">Ticket Médio</div>
+            <div class="metric-value blue">R$2k–8k</div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">Tempo até $</div>
+            <div class="metric-value yellow">5–10 dias</div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">Escalabilidade</div>
+            <div class="metric-value purple">Média</div>
+          </div>
+        </div>
+        <details>
+          <summary>Ver detalhes de execução</summary>
+          <div class="rank-details">
+            <h4>O que vender</h4>
+            <ul>
+              <li>Chatbots WhatsApp para atendimento (clínicas, restaurantes, e-commerces)</li>
+              <li>Automações de processos internos (lead capture → CRM → follow-up)</li>
+              <li>Agentes de IA para responder FAQ, agendar consultas, qualificar leads</li>
+              <li>Dashboards e relatórios automatizados</li>
+              <li>Integrações entre sistemas (ERP → WhatsApp → Planilha)</li>
+            </ul>
+            <h4>Onde encontrar clientes</h4>
+            <ul>
+              <li>LinkedIn outbound (Ricardo lidera a prospecção)</li>
+              <li>Grupos de WhatsApp de empreendedores</li>
+              <li>Comunidades de e-commerce (Shopify Brasil, Nuvemshop)</li>
+              <li>Indicações de professores FIAP e colegas</li>
+              <li>Freelance platforms (Workana, 99freelas) para primeiros cases</li>
+            </ul>
+            <h4>Stack técnico</h4>
+            <ul>
+              <li>n8n (self-hosted) + Evolution API para WhatsApp</li>
+              <li>Supabase para backend rápido</li>
+              <li>Claude API para os agentes inteligentes</li>
+              <li>Vercel/Railway para deploy rápido</li>
+            </ul>
+          </div>
+        </details>
+      </div>
+
+      <!-- #2 -->
+      <div class="rank-card tier-s">
+        <div class="rank-number">#2</div>
+        <div class="rank-header">
+          <div>
+            <div class="rank-title">Micro-SaaS: Plataforma WhatsApp AI para Negócios</div>
+            <div class="rank-tags">
+              <span class="tag tag-green">RECORRENTE</span>
+              <span class="tag tag-blue">SAAS</span>
+              <span class="tag tag-purple">ALTA PRIORIDADE</span>
+            </div>
+          </div>
+        </div>
+        <div class="rank-body">
+          Uma plataforma onde qualquer PME conecta seu WhatsApp e ganha um assistente de IA treinado para o negócio dela — atendimento, agendamento, vendas. Ricardo já tem toda a base técnica do Ruralfy (Evolution API + n8n + Supabase). Transformar isso em produto white-label é o salto natural.
+        </div>
+        <div class="rank-metrics">
+          <div class="metric">
+            <div class="metric-label">Receita/Mês</div>
+            <div class="metric-value green">R$5k–20k</div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">Preço/Cliente</div>
+            <div class="metric-value blue">R$97–297/mês</div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">Tempo até $</div>
+            <div class="metric-value yellow">15–20 dias</div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">Escalabilidade</div>
+            <div class="metric-value purple">Muito Alta</div>
+          </div>
+        </div>
+        <details>
+          <summary>Ver detalhes de execução</summary>
+          <div class="rank-details">
+            <h4>Features do MVP</h4>
+            <ul>
+              <li>Onboarding self-service: conectar WhatsApp em 3 cliques</li>
+              <li>Treinamento do agente via upload de documentos / FAQ</li>
+              <li>Dashboard com métricas de atendimento</li>
+              <li>Templates prontos por nicho (clínica, restaurante, loja)</li>
+              <li>Integração com Google Calendar para agendamentos</li>
+            </ul>
+            <h4>Estratégia de go-to-market</h4>
+            <ul>
+              <li>Freemium: 50 mensagens/mês grátis, planos pagos a partir de R$97</li>
+              <li>Converter clientes da agência (#1) em assinantes da plataforma</li>
+              <li>Product Hunt launch para tração internacional</li>
+              <li>Conteúdo no LinkedIn/Twitter mostrando o produto em ação</li>
+            </ul>
+            <h4>Vantagem competitiva</h4>
+            <ul>
+              <li>Preço agressivo vs. concorrentes (Manychat, Botpress cobram USD)</li>
+              <li>100% adaptado ao mercado BR (PIX, WhatsApp-first)</li>
+              <li>Setup em minutos vs. horas dos concorrentes</li>
+            </ul>
+          </div>
+        </details>
+      </div>
+
+      <!-- #3 -->
+      <div class="rank-card tier-a">
+        <div class="rank-number">#3</div>
+        <div class="rank-header">
+          <div>
+            <div class="rank-title">Security Scan as a Service — CyberShield</div>
+            <div class="rank-tags">
+              <span class="tag tag-green">RETORNO RÁPIDO</span>
+              <span class="tag tag-yellow">SERVIÇO + SAAS</span>
+              <span class="tag tag-blue">NICHO PREMIUM</span>
+            </div>
+          </div>
+        </div>
+        <div class="rank-body">
+          Serviço automatizado de auditoria de segurança para sites e aplicações de PMEs. Henrique lidera — combina ferramentas open source de scanning com análise por IA que gera relatórios profissionais. Ticket alto porque segurança é crítica e poucos oferecem isso para PMEs a preço acessível.
+        </div>
+        <div class="rank-metrics">
+          <div class="metric">
+            <div class="metric-label">Receita/Mês</div>
+            <div class="metric-value green">R$5k–15k</div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">Ticket Médio</div>
+            <div class="metric-value blue">R$1.5k–5k</div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">Tempo até $</div>
+            <div class="metric-value yellow">10–15 dias</div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">Escalabilidade</div>
+            <div class="metric-value purple">Alta</div>
+          </div>
+        </div>
+        <details>
+          <summary>Ver detalhes de execução</summary>
+          <div class="rank-details">
+            <h4>Modelo de operação</h4>
+            <ul>
+              <li>Scan automatizado (OWASP ZAP, Nmap, Nikto) + análise com IA</li>
+              <li>Relatório profissional PDF gerado automaticamente com findings e recomendações</li>
+              <li>Opção de reteste após correções (upsell R$500-1k)</li>
+              <li>Plano recorrente: scan mensal + monitoramento (R$297-597/mês)</li>
+            </ul>
+            <h4>Público alvo</h4>
+            <ul>
+              <li>E-commerces que processam dados de cartão (precisam de compliance PCI)</li>
+              <li>Startups que lidam com dados sensíveis (LGPD)</li>
+              <li>Agências de desenvolvimento que precisam auditar projetos dos clientes</li>
+              <li>Clínicas e escritórios com sistemas web</li>
+            </ul>
+            <h4>Diferencial</h4>
+            <ul>
+              <li>Relatório em português, adaptado para leigos entenderem</li>
+              <li>Preço BR (vs. ferramentas gringas que custam USD 200+/mês)</li>
+              <li>Combo: scan + implementação das correções</li>
+            </ul>
+          </div>
+        </details>
+      </div>
+
+      <!-- #4 -->
+      <div class="rank-card tier-a">
+        <div class="rank-number">#4</div>
+        <div class="rank-header">
+          <div>
+            <div class="rank-title">Templates & Boilerplates de IA — Loja Digital</div>
+            <div class="rank-tags">
+              <span class="tag tag-green">RENDA PASSIVA</span>
+              <span class="tag tag-yellow">PRODUTO DIGITAL</span>
+            </div>
+          </div>
+        </div>
+        <div class="rank-body">
+          Pacotes prontos de código e automações que desenvolvedores e empresas podem comprar e usar. Templates de chatbots, automações n8n, landing pages com IA, dashboards. Cada template é feito uma vez e vendido infinitas vezes. O custo de produção com Claude Max é quase zero.
+        </div>
+        <div class="rank-metrics">
+          <div class="metric">
+            <div class="metric-label">Receita/Mês</div>
+            <div class="metric-value green">R$2k–10k</div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">Ticket Médio</div>
+            <div class="metric-value blue">R$47–197</div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">Tempo até $</div>
+            <div class="metric-value yellow">7–14 dias</div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">Escalabilidade</div>
+            <div class="metric-value purple">Muito Alta</div>
+          </div>
+        </div>
+        <details>
+          <summary>Ver detalhes de execução</summary>
+          <div class="rank-details">
+            <h4>Produtos para criar</h4>
+            <ul>
+              <li>Pack de automações n8n prontas (10 workflows) — R$97</li>
+              <li>Template de WhatsApp Bot com IA (Next.js + Supabase) — R$147</li>
+              <li>Boilerplate SaaS completo (auth, billing, dashboard) — R$197</li>
+              <li>Kit de prompts profissionais para devs — R$47</li>
+              <li>Template de landing page com IA integrada — R$67</li>
+            </ul>
+            <h4>Onde vender</h4>
+            <ul>
+              <li>Gumroad / Hotmart / Kiwify (mercado BR)</li>
+              <li>Product Hunt (lançamentos com hype)</li>
+              <li>GitHub Sponsors + repo freemium</li>
+              <li>Twitter/X dev community</li>
+              <li>Landing page própria com Stripe</li>
+            </ul>
+          </div>
+        </details>
+      </div>
+
+      <!-- #5 -->
+      <div class="rank-card tier-b">
+        <div class="rank-number">#5</div>
+        <div class="rank-header">
+          <div>
+            <div class="rank-title">Conteúdo Técnico Monetizado (YouTube / Blog / Newsletter)</div>
+            <div class="rank-tags">
+              <span class="tag tag-yellow">LONGO PRAZO</span>
+              <span class="tag tag-blue">AUTORIDADE</span>
+            </div>
+          </div>
+        </div>
+        <div class="rank-body">
+          Canal no YouTube e/ou newsletter documentando a jornada de vocês — "4 devs, 30 dias, construindo negócios com IA". Conteúdo técnico + empreendedor atrai audiência de devs e empreendedores. Monetiza via patrocínios, afiliados (Claude, Supabase, Vercel) e funil para os outros produtos.
+        </div>
+        <div class="rank-metrics">
+          <div class="metric">
+            <div class="metric-label">Receita/Mês</div>
+            <div class="metric-value green">R$1k–5k</div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">Valor Real</div>
+            <div class="metric-value blue">Funil p/ tudo</div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">Tempo até $</div>
+            <div class="metric-value yellow">20–30 dias</div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">Escalabilidade</div>
+            <div class="metric-value purple">Exponencial</div>
+          </div>
+        </div>
+        <details>
+          <summary>Ver detalhes de execução</summary>
+          <div class="rank-details">
+            <h4>Por que isso é importante</h4>
+            <ul>
+              <li>Funciona como funil de aquisição orgânica para todos os outros projetos</li>
+              <li>Documenta o processo (prova social para vender serviços)</li>
+              <li>Constrói audiência que compra templates e assina o SaaS</li>
+              <li>Abre portas para patrocínios e parcerias</li>
+            </ul>
+            <h4>Formato sugerido</h4>
+            <ul>
+              <li>YouTube: vídeos semanais "Building in public" (15-20min)</li>
+              <li>Twitter/X: thread diária com progresso e aprendizados</li>
+              <li>Newsletter semanal com dicas técnicas e bastidores</li>
+              <li>LinkedIn: posts técnicos para atrair clientes B2B</li>
+            </ul>
+          </div>
+        </details>
+      </div>
+
+      <!-- #6 -->
+      <div class="rank-card tier-b">
+        <div class="rank-number">#6</div>
+        <div class="rank-header">
+          <div>
+            <div class="rank-title">Consultoria LGPD + Segurança para Startups</div>
+            <div class="rank-tags">
+              <span class="tag tag-green">TICKET ALTO</span>
+              <span class="tag tag-blue">B2B</span>
+            </div>
+          </div>
+        </div>
+        <div class="rank-body">
+          Combinar a expertise de cybersec do Henrique com automações de IA para oferecer pacotes de adequação à LGPD. Inclui scan de vulnerabilidades, mapeamento de dados, geração automatizada de documentos de compliance, e plano de ação. Mercado enorme e mal atendido.
+        </div>
+        <div class="rank-metrics">
+          <div class="metric">
+            <div class="metric-label">Receita/Mês</div>
+            <div class="metric-value green">R$5k–20k</div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">Ticket Médio</div>
+            <div class="metric-value blue">R$3k–10k</div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">Tempo até $</div>
+            <div class="metric-value yellow">15–25 dias</div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">Escalabilidade</div>
+            <div class="metric-value purple">Média-Alta</div>
+          </div>
+        </div>
+        <details>
+          <summary>Ver detalhes de execução</summary>
+          <div class="rank-details">
+            <h4>Pacotes</h4>
+            <ul>
+              <li>Básico (R$3k): Scan + Relatório LGPD + Documentação</li>
+              <li>Pro (R$6k): Básico + Implementação de correções + Treinamento equipe</li>
+              <li>Enterprise (R$10k+): Pro + Monitoramento contínuo + DPO as a Service</li>
+            </ul>
+            <h4>Automação com IA</h4>
+            <ul>
+              <li>Geração automática de políticas de privacidade customizadas</li>
+              <li>Mapeamento de dados com análise de código fonte por IA</li>
+              <li>Relatório de compliance gerado por Claude em minutos</li>
+              <li>Checklist interativo de adequação LGPD</li>
+            </ul>
+          </div>
+        </details>
+      </div>
+    </div>
+  </div>
+
+  <!-- ALOCAÇÃO DE EQUIPE -->
+  <div class="section">
+    <h2 class="section-title"><span class="icon">👥</span> Alocação da Equipe</h2>
+    <div class="team-grid">
+      <div class="team-card">
+        <div class="team-name">Ricardo</div>
+        <div class="team-role">Estratégia / Agentes IA / Vendas</div>
+        <ul class="team-tasks">
+          <li>Lidera prospecção e vendas da agência (#1)</li>
+          <li>Arquiteta o Micro-SaaS WhatsApp (#2)</li>
+          <li>Define pricing e go-to-market de todos os projetos</li>
+          <li>Cria os agentes de IA e integrações</li>
+          <li>Gerencia a operação geral do squad</li>
+        </ul>
+      </div>
+      <div class="team-card">
+        <div class="team-name">Luís</div>
+        <div class="team-role">Engenharia Core / Sistemas Complexos</div>
+        <ul class="team-tasks">
+          <li>Desenvolvimento principal do Micro-SaaS (#2)</li>
+          <li>Infra e arquitetura de todos os projetos</li>
+          <li>Constrói os templates/boilerplates (#4)</li>
+          <li>Implementa features complexas dos serviços (#1)</li>
+          <li>Code review e qualidade técnica</li>
+        </ul>
+      </div>
+      <div class="team-card">
+        <div class="team-name">Nicolas</div>
+        <div class="team-role">Full-stack / Integrações / Suporte</div>
+        <ul class="team-tasks">
+          <li>Frontend e dashboards de todos os projetos</li>
+          <li>Integrações com APIs de terceiros</li>
+          <li>Landing pages e material de vendas</li>
+          <li>Entregas dos projetos da agência (#1)</li>
+          <li>Apoio nas áreas que mais precisam (flex)</li>
+        </ul>
+      </div>
+      <div class="team-card">
+        <div class="team-name">Henrique</div>
+        <div class="team-role">Cybersec / Security Products</div>
+        <ul class="team-tasks">
+          <li>Lidera CyberShield — security scan (#3)</li>
+          <li>Lidera consultoria LGPD (#6)</li>
+          <li>Segurança de todos os projetos do squad</li>
+          <li>Desenvolve ferramentas de scanning automatizado</li>
+          <li>Conteúdo técnico sobre cybersec (#5)</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- CRONOGRAMA -->
+  <div class="section">
+    <h2 class="section-title"><span class="icon">📅</span> Cronograma — 4 Semanas</h2>
+    <div class="timeline">
+
+      <div class="week">
+        <div class="week-header">
+          <div class="week-title">Semana 1 — "Fundação + Primeiros Reais"</div>
+          <div class="week-focus">Foco: Começar a vender AGORA + Setup de infra</div>
+        </div>
+        <div class="week-tasks">
+          <div class="week-task"><span class="person">Ricardo</span>Criar perfis profissionais (LinkedIn, site da agência). Prospectar 30 leads. Fechar primeiro cliente de automação.</div>
+          <div class="week-task"><span class="person">Luís</span>Setup da infra compartilhada (Supabase, n8n, Vercel). Iniciar scaffold do Micro-SaaS WhatsApp.</div>
+          <div class="week-task"><span class="person">Nicolas</span>Criar landing page da agência. Template base para propostas. Apoiar entregas.</div>
+          <div class="week-task"><span class="person">Henrique</span>Montar pipeline automatizado de security scan. Criar template do relatório de auditoria.</div>
+          <div class="week-task"><span class="person">Squad</span>Definir processos internos: daily de 15min, Notion para tracking, Git workflow.</div>
+        </div>
+      </div>
+
+      <div class="week">
+        <div class="week-header">
+          <div class="week-title">Semana 2 — "Execução Pesada"</div>
+          <div class="week-focus">Foco: Entregar primeiros projetos + MVP do SaaS</div>
+        </div>
+        <div class="week-tasks">
+          <div class="week-task"><span class="person">Ricardo</span>Entregar primeiros projetos da agência. Continuar prospecção (mais 20 leads). Refinar pitch.</div>
+          <div class="week-task"><span class="person">Luís</span>MVP funcional do Micro-SaaS WhatsApp (onboarding + bot básico + dashboard).</div>
+          <div class="week-task"><span class="person">Nicolas</span>Frontend do Micro-SaaS. Criar 3 templates de automação para vender (#4).</div>
+          <div class="week-task"><span class="person">Henrique</span>Entregar primeiras auditorias de segurança. Testar serviço LGPD com 1-2 empresas.</div>
+        </div>
+      </div>
+
+      <div class="week">
+        <div class="week-header">
+          <div class="week-title">Semana 3 — "Escalar e Produto"</div>
+          <div class="week-focus">Foco: Lançar SaaS + Escalar serviços + Templates no ar</div>
+        </div>
+        <div class="week-tasks">
+          <div class="week-task"><span class="person">Ricardo</span>Lançar Micro-SaaS para beta testers. Converter clientes da agência. 10+ leads novos.</div>
+          <div class="week-task"><span class="person">Luís</span>Billing/Stripe no SaaS. Polir features. Criar mais 3 templates premium.</div>
+          <div class="week-task"><span class="person">Nicolas</span>Publicar templates no Gumroad/Hotmart. Landing page do SaaS. Primeiro conteúdo no YouTube.</div>
+          <div class="week-task"><span class="person">Henrique</span>Lançar página do CyberShield. Automatizar mais o pipeline de scan. Prospectar via LinkedIn.</div>
+        </div>
+      </div>
+
+      <div class="week">
+        <div class="week-header">
+          <div class="week-title">Semana 4 — "Launch Week + Otimização"</div>
+          <div class="week-focus">Foco: Lançamentos públicos + Otimizar funis + Planejar mês 2</div>
+        </div>
+        <div class="week-tasks">
+          <div class="week-task"><span class="person">Ricardo</span>Product Hunt launch do SaaS. Pitch para investidores se relevante. Fechar contratos recorrentes.</div>
+          <div class="week-task"><span class="person">Luís</span>Bug fixes e otimização do SaaS. Documentação. Features baseadas em feedback.</div>
+          <div class="week-task"><span class="person">Nicolas</span>Otimizar landing pages (A/B). Segundo lote de templates. Conteúdo consistente.</div>
+          <div class="week-task"><span class="person">Henrique</span>Fechar pacotes recorrentes de monitoramento. Criar checklist LGPD como lead magnet.</div>
+          <div class="week-task"><span class="person">Squad</span>Retrospectiva: o que funcionou, o que escalar, o que matar. Plano para mês 2.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROJEÇÃO FINANCEIRA -->
+  <div class="section">
+    <h2 class="section-title"><span class="icon">💰</span> Projeção Financeira — Cenários</h2>
+    <div class="finance-grid">
+
+      <div class="finance-card">
+        <div class="finance-title">Cenário Conservador</div>
+        <div class="finance-row"><span class="label">Agência (2-3 projetos)</span><span>R$6.000</span></div>
+        <div class="finance-row"><span class="label">CyberShield (2 auditorias)</span><span>R$3.000</span></div>
+        <div class="finance-row"><span class="label">Templates (vendas avulsas)</span><span>R$1.500</span></div>
+        <div class="finance-row"><span class="label">SaaS (10 assinantes)</span><span>R$970</span></div>
+        <div class="finance-row"><span class="label">LGPD (1 pacote)</span><span>R$3.000</span></div>
+        <div class="finance-total"><span>Total Mês 2</span><span class="value">R$14.470</span></div>
+      </div>
+
+      <div class="finance-card">
+        <div class="finance-title">Cenário Realista</div>
+        <div class="finance-row"><span class="label">Agência (4-5 projetos)</span><span>R$15.000</span></div>
+        <div class="finance-row"><span class="label">CyberShield (3-4 auditorias)</span><span>R$6.000</span></div>
+        <div class="finance-row"><span class="label">Templates (tração inicial)</span><span>R$3.000</span></div>
+        <div class="finance-row"><span class="label">SaaS (30 assinantes)</span><span>R$4.500</span></div>
+        <div class="finance-row"><span class="label">LGPD (2 pacotes)</span><span>R$6.000</span></div>
+        <div class="finance-total"><span>Total Mês 2</span><span class="value">R$34.500</span></div>
+      </div>
+
+      <div class="finance-card">
+        <div class="finance-title">Cenário Otimista</div>
+        <div class="finance-row"><span class="label">Agência (6-8 projetos)</span><span>R$28.000</span></div>
+        <div class="finance-row"><span class="label">CyberShield (5+ auditorias)</span><span>R$10.000</span></div>
+        <div class="finance-row"><span class="label">Templates (viral/PH)</span><span>R$7.000</span></div>
+        <div class="finance-row"><span class="label">SaaS (60 assinantes)</span><span>R$9.000</span></div>
+        <div class="finance-row"><span class="label">LGPD (3+ pacotes)</span><span>R$12.000</span></div>
+        <div class="finance-total"><span>Total Mês 2</span><span class="value">R$66.000</span></div>
+      </div>
+    </div>
+
+    <div class="finance-card" style="margin-top: 1rem;">
+      <div class="finance-title">Custos Estimados (Mês 1)</div>
+      <div class="finance-row"><span class="label">Claude Max (2-3 planos)</span><span style="color: var(--red);">-R$1.200 – R$1.800</span></div>
+      <div class="finance-row"><span class="label">Domínios (3-4)</span><span style="color: var(--red);">-R$200</span></div>
+      <div class="finance-row"><span class="label">Hosting (Vercel/Railway/Supabase free tiers)</span><span style="color: var(--green);">R$0</span></div>
+      <div class="finance-row"><span class="label">APIs (Evolution, etc)</span><span style="color: var(--red);">-R$100</span></div>
+      <div class="finance-row"><span class="label">Marketing mínimo</span><span style="color: var(--red);">-R$200</span></div>
+      <div class="finance-total"><span>Custo Total</span><span style="color: var(--red);">R$1.700 – R$2.300</span></div>
+    </div>
+  </div>
+
+  <!-- COMO USAR CLAUDE MAX -->
+  <div class="section">
+    <h2 class="section-title"><span class="icon">⚡</span> Como Extrair o Máximo do Claude Max</h2>
+    <div class="ranking-grid">
+      <div class="rank-card tier-s" style="border-left-color: var(--accent);">
+        <div class="rank-title" style="margin-bottom: 1rem;">Operação em Turnos com Claude</div>
+        <div class="rank-details" style="border: none; padding: 0;">
+          <h4>Distribuição de Planos</h4>
+          <ul>
+            <li><strong>Plano 1 (Ricardo + Nicolas):</strong> Projetos da agência, prospecção, integrações</li>
+            <li><strong>Plano 2 (Luís):</strong> Desenvolvimento core do SaaS e templates (precisa de sessões longas contínuas)</li>
+            <li><strong>Plano 3 (Henrique):</strong> Security tools, relatórios, LGPD automation</li>
+          </ul>
+          <h4>Técnicas para produtividade máxima</h4>
+          <ul>
+            <li>Criar "Skills" customizadas no Claude para cada projeto (contexto persistente)</li>
+            <li>Usar Claude para code review cruzado entre os membros</li>
+            <li>Documentar tudo via Claude: cada projeto tem seu CLAUDE.md com contexto</li>
+            <li>Paralelizar: enquanto um espera resposta, outro usa a mesma conta</li>
+            <li>Noite: deixar agentes executando tarefas longas (refactoring, testes, docs)</li>
+          </ul>
+          <h4>O que Claude faz melhor para vocês</h4>
+          <ul>
+            <li>Gerar MVPs em horas (Ricardo e Luís já sabem usar bem)</li>
+            <li>Escrever propostas comerciais e emails de prospecção</li>
+            <li>Criar relatórios de segurança profissionais a partir de scan data</li>
+            <li>Debugging e refactoring em velocidade 10x</li>
+            <li>Gerar landing pages, copy de vendas, documentação</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PRIORIDADES SEMANAIS -->
+  <div class="section">
+    <h2 class="section-title"><span class="icon">🎯</span> Regras de Operação do Squad</h2>
+    <div class="ranking-grid">
+      <div class="rank-card" style="border-left: 4px solid var(--accent);">
+        <div class="rank-details" style="border: none; padding: 0;">
+          <h4>Rituais Diários</h4>
+          <ul>
+            <li><strong>09:00</strong> — Daily standup (15min): O que fez, o que vai fazer, blockers</li>
+            <li><strong>13:00</strong> — Quick sync (5min): Alinhamento rápido pós-almoço</li>
+            <li><strong>21:00</strong> — Review do dia: Commits, entregas, métricas atualizadas</li>
+          </ul>
+          <h4>Rituais Semanais</h4>
+          <ul>
+            <li><strong>Segunda</strong> — Sprint planning: definir entregas da semana</li>
+            <li><strong>Sexta</strong> — Demo day: cada um mostra o que construiu</li>
+            <li><strong>Sexta</strong> — Financeiro: quanto entrou, quanto vai entrar, pipeline</li>
+          </ul>
+          <h4>Regras de Ouro</h4>
+          <ul>
+            <li>"Ship > Perfect" — Lançar rápido, iterar depois</li>
+            <li>"Revenue first" — Priorizar o que gera dinheiro HOJE</li>
+            <li>"1 person = 1 owner" — Cada projeto tem um dono claro</li>
+            <li>"Kill fast" — Se não validou em 5 dias, pivota ou mata</li>
+            <li>"Document everything" — Tudo no Notion/GitHub, nada na cabeça</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="text-align: center; padding: 2rem; color: var(--text2); font-size: 0.85rem; border-top: 1px solid var(--border); margin-top: 2rem;">
+    Estratégia gerada para o Squad FIAP — Março 2026<br>
+    Próximo passo: validar prioridades e começar execução Semana 1
+  </div>
+
+</div>
+</body>
+</html>
