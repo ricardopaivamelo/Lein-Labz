@@ -62,8 +62,9 @@ Lein-Labz/
 
 ## Links
 
-- [Estratégia 30 Dias](public/estrategia.html)
-- [Sistema de Organização](public/organizacao.html)
+- [Estratégia 30 Dias](https://lein-labz.vercel.app/estrategia.html)
+- [Sistema de Organização](https://lein-labz.vercel.app/organizacao.html)
+- [Hub Central](https://lein-labz.vercel.app)
 
 ---
 
