@@ -24,7 +24,7 @@ Squad de 4 estudantes FIAP construindo múltiplos negócios digitais em 30 dias 
 
 ## Tech Stack
 
-Next.js · Tailwind · shadcn/ui · Supabase · Vercel · Stripe · n8n · Evolution API · Claude Max
+Next.js · Tailwind · shadcn/ui · Supabase · Vercel · Stripe · n8n · Evolution API · 3 Claude Max
 
 ## Estrutura do Repositório
 
