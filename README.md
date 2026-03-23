@@ -68,4 +68,4 @@ Lein-Labz/
 
 ---
 
-*Março 2026 · FIAP*
+*Março 2026 · lein-Labz*
