@@ -17,7 +17,7 @@ Squad de 4 estudantes FIAP construindo múltiplos negócios digitais em 30 dias 
 
 ## Equipe
 
-- **Ricardo** — Agentes de IA, Automações estratégia, liderança
+- **Ricardo** — Agentes de IA, Automações estratégia
 - **Luís** — Sistemas complexos, alta disponibilidade
 - **Nicolas** — Full-stack, integrações, DevOps
 - **Henrique** — Cibersegurança, LGPD, IA aplicada
